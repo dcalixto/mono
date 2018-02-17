@@ -1,12 +1,34 @@
+<div>
+
+
+
+  	
+
 <h1>Signup!</h1>
 
+
+
+<% if flash[:notice] %>
+    <div class="notice"><%= flash[:notice] %></div>
+  <% end %>
+
+
+  <% if flash[:error] %>
+    <div class="error"><%= flash[:error] %></div>
+  <% end %>
+
+<ul>
 <%= form_for :user, url: '/users' do |f| %>
 
-  Name: <%= f.text_field :name %>
-  Username: <%= f.text_field :username %>
-  Email: <%= f.text_field :email %>
-  Password: <%= f.password_field :password %>
+
+  <li>Name: <%= f.text_field :name %></li>
+  <li>Username: <%= f.text_field :username %></li>
+  <li>Email: <%= f.text_field :email %></li>
+  <li>Password: <%= f.password_field :password %></li>
  
-  <%= f.submit "Submit" %>
+   <li><%= submit_tag("Sign Up") %></li>
+
 
 <% end %>
+</ul>
+</div>

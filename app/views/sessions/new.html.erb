@@ -1,11 +1,25 @@
 <!-- app/views/sessions/new.html.erb -->
+<div>
+
+
+
+<% if flash[:notice] %>
+    <div class="notice"><%= flash[:notice] %></div>
+  <% end %>
 
 <h1>Login</h1>
+<ul>
+<%= form_tag '/session' do %>
 
-<%= form_tag '/login' do %>
 
-  Username or Email: <%= text_field_tag :username_or_email %>
-  Password: <%= password_field_tag :password %>
-  <%= submit_tag("Log In") %>
+
+  <li>Username or Email: <%= text_field_tag :username_or_email %></li>
+  <li>Password: <%= password_field_tag :password %></li>
+  <li><%= submit_tag("Log In") %></li>
+
 
 <% end %>
+</ul>
+</div>
+
+

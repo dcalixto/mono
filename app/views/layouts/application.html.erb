@@ -1,23 +1,23 @@
-<!-- app/views/layout/application.html.erb -->
-
 <!DOCTYPE html>
 <html>
-<head>
-  <title>App</title>
-  <%= stylesheet_link_tag    "application", media: "all", "data-turbolinks-track" => true %>
-  <%= javascript_include_tag "application", "data-turbolinks-track" => true %>
-  <%= csrf_meta_tags %>
-</head>
-<body>
+  <head>
+    <title>App</title>
+    <%= csrf_meta_tags %>
 
-# added these lines.
+    <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track': 'reload' %>
+    <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
+  </head>
+
+  <body>
+
+
 <% if signed_in? %>
-  Signed in as <%= current_user.username %> | <%= link_to "Logout", '/logout' %>
+  Signed in as <%= current_user.username %> | <%= link_to "Logout", '/logout', method: :delete %>
 <% else %>
   <%= link_to 'Login', '/login' %> | <%= link_to 'Signup', '/signup' %>
 <% end %>
 
-<%= yield %>
 
-</body>
+    <%= yield %>
+  </body>
 </html>

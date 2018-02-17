@@ -18,12 +18,20 @@ class UsersController < ApplicationController
 
     respond_to do |format|
       if @user.save
-        session[:user_id] = user.id
+        session[:user_id] = @user.id
 
         format.html { redirect_to '/', notice: 'User created.' }
         format.json { redirect_to '/', status: :created }
+
+        elsif self.request.format.json?    
+
+          @data = File.read('/home/daniel/puppy/public/login.json')
+          @data = @data.gsub(/ROOT/, root_url)
+          render :json => @data
+          
+
       else
-        format.html { redirect_to '/signup' }
+        format.html { redirect_to '/signup', error: "Something Went Wrong." }
         format.json { render json: @user.errors, status: :unprocessable_entity }
       end
     end
@@ -67,8 +75,7 @@ class UsersController < ApplicationController
 
 
   def user_params
-    params.require(:user).permit(:name,:username, :bio, :avatar, :phone, :facebook, 
-      :twitter,:email, :password_digest, :password_confirmation)
+    params.require(:user).permit(:name,:username, :email, :password, :password_confirmation)
   end
 
 end

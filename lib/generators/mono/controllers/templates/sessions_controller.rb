@@ -5,23 +5,29 @@ class SessionsController < ApplicationController
   end
 
   def create
-    user = User.find_by_username_or_email(params[:username_or_email])
-    # If the user exists AND the password entered is correct.
-    if user && user.authenticate(params[:password])
+  
+    user = User.authenticate(params[:username_or_email],params[:password])
+    if user
+     
       user.update_attribute(:login_at, Time.zone.now)
       user.update_attribute(:ip_address, request.remote_ip)
       session[:user_id] = user.id
+      redirect_to '/'
 
-      redirect_to '/'
     elsif self.request.format.json?
-      # allow_token_to_be_used_only_for(user)
-      send_auth_token_for_login_of(user)
-      redirect_to '/'
+
+      @data = File.read('/home/daniel/puppy/public/login.json')
+      @data = @data.gsub(/ROOT/, root_url)
+      render :json => @data
+
+      #allow_token_to_be_used_only_for(user)
+      # send_auth_token_for_login_of(user)
+      #redirect_to '/'
 
     else
       # If user's login doesn't work, send them back to the login form.
-      redirect_to '/login'
-      flash.now[:alert] = "Email, Username or password invalid"
+      redirect_to '/login', notice:  "Email, Username or password invalid"
+
     end
 
   end

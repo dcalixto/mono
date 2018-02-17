@@ -12,55 +12,36 @@ module Mono
           "app/controllers/application_controller.rb",
           ApplicationController,
 
-        "
-         protect_from_forgery with: :null_session, if: Proc.new { |c| c.request.format == 'application/json' }
-         
-         respond_to :html, :json
-         helper_method :current_user
-
-         private
-
-         def current_user
-           @current_user ||= User.find(session[:user_id]) if session[:user_id]
-         end
+          "
+  protect_from_forgery with: :null_session, if: Proc.new { |c| c.request.format == 'application/json' }
+  #protect_from_forgery with: :exception
+  respond_to :html, :json
 
 
-         def signed_in?
-             current_user.present?
-         end
+  private
 
-         def signed_out?
-            !signed_in?
-         end
+  def current_user
+    @current_user ||= User.find(session[:user_id]) if session[:user_id]
+  end
+
+  helper_method :current_user
 
 
-        protected
+  def signed_in?
+    current_user.present?
+  end
 
-        #Override authenticate_user! to handle html and json separately
+  helper_method :signed_in?
 
-        def authenticate_user
-           if self.request.format.html?
-     
-            elsif self.request.format.json?
-             if self.request.parameters['controller'].start_with?('sessions')
-              # use the default if session related
-        
-            else
-              # others
-               if user_signed_in?
-              # use the default if already signed in
-      
-            else
-              # serve the static login page if not signed in
-                @data = File.read('#{Rails.root}/public/login.json')
-                @data = @data.gsub(/ROOT/, root_url)
-                render :json => @data
-             end
-           end
-          end
-        end\n"
+  def authenticate_user!
+    unless signed_in?
+      redirect_to login_url, notice: 'Not authorized' 
+    end
+  end
 
-        )
+
+  helper_method :authenticate_user!\n")
+
       end
 
       def create_or_inject_mono_into_user_model
@@ -69,44 +50,50 @@ module Mono
             "app/models/user.rb",
 
             "
-             has_secure_password
-             
-             validates_uniqueness_of :email
+    has_secure_password
 
-             validates :username, :presence => true, :uniqueness => true, :length => { :in => 1..20 }
-             validates_length_of :password, :in => 6..20, :on => :create
+  validates_uniqueness_of :email
 
-             
-            before_create { generate_token(:auth_token) }
-  
-
-            def generate_token(column)
-                begin
-                   self[column] = SecureRandom.urlsafe_base64
-                 end while User.exists?(column => self[column])
-            end
-  
-            def self.authenticate(username_or_email='', password='')
-              if user = User.find_by_email(username_or_email)     
-              else
-                user = User.find_by_username(username_or_email)
-              end
-              if user && user.match_password(password)
-                 return user
-              else
-                 return false
-              end
-            end\n",
+  validates :username, :presence => true, :uniqueness => true, :length => { :in => 1..20 }
+  validates_length_of :password, :in => 6..20, :on => :create
 
 
+has_many :posts
 
+  before_create { generate_token(:auth_token) }
+
+
+  def generate_token(column)
+    begin
+      self[column] = SecureRandom.urlsafe_base64
+    end while User.exists?(column => self[column])
+  end
+
+  def self.authenticate(username_or_email='', password='')
+    if user = User.find_by_email(username_or_email)
+    else
+      user = User.find_by_username(username_or_email)
+    end
+    if user && user.match_password(password)
+      return user
+    else
+      return false
+    end
+  end
+
+
+
+def match_password(password='')
+  :password_digest
+end \n",
 
             after: "class User < #{models_inherit_from}\n",
 
           )
-        else
-          @inherit_from = models_inherit_from
-          template("user.rb.erb", "app/models/user.rb")
+
+      else
+        @inherit_from = models_inherit_from
+        template("user.rb.erb", "app/models/user.rb")
         end
       end
 
